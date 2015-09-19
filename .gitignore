@@ -1,6 +1,7 @@
 users.json
 users_dbg.json
 users_old.json
+config.json
 __pycache__
 *.pyc
 _*_cache
