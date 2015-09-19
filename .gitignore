@@ -1,3 +1,6 @@
 users.json
+users_dbg.json
+users_old.json
 __pycache__
 *.pyc
+_*_cache

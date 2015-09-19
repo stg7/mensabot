@@ -9,6 +9,7 @@
     2015
 """
 import json
+import pprint
 
 
 def colorred(m):
@@ -49,6 +50,14 @@ def lHelp(msg):
 
 def jPrint(x, output=True):
     str_x = json.dumps(x, indent=4, sort_keys=True)
+    if output:
+        lInfo("\n" + str_x)
+    return str_x
+
+
+def pPrint(x, output=True):
+    pp = pprint.PrettyPrinter(indent=4)
+    str_x = pp.pformat(x)
     if output:
         lInfo("\n" + str_x)
     return str_x
