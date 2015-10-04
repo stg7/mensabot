@@ -17,7 +17,7 @@
           <div class="col-lg-6">
            mensas:
            <ul>
-             % for m in mensas:
+             % for m in sorted(mensas.keys()):
               <li><a href="./mensa/{{mensas[m]}}" >{{m}}</a></li>
              % end
            </ul>

@@ -17,9 +17,15 @@
           <div class="col-lg-6">
            <h4>{{mensa}} <small><a href="/api/mensa/{{mensaname}}"> [api]</a></small></h4>
            <ul>
+            <table class="table">
              % for f in food.get("res", []):
-                {{f}}
+                <tr>
+             %   for t in f:
+                    <td>{{t}}</td>
+             %   end
+                </tr>
              % end
+             </table>
            </ul>
           </div>
 

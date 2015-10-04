@@ -47,13 +47,13 @@ def get_pretty_name(x):
 class Mensaparser(object):
     _url = ""
     _name = ""
-    __cache = None
+    __cachename = ""
 
     def __init__(self, mensaurl, name):
         self._url = mensaurl
         self._name = name
         name = "_".join(name.split())
-        self.__cache = shelve.open(os.path.dirname(os.path.realpath(__file__)) + "/_" + name + "_cache")
+        self.__cachename = os.path.dirname(os.path.realpath(__file__)) + "/_" + name + "_cache"
 
     def _parse_day(self, node):
         dishes = []
@@ -70,8 +70,9 @@ class Mensaparser(object):
 
     def get(self):
         key = datetime.now().strftime("%x|%H")
+        __cache = shelve.open(self.__cachename)
 
-        if key not in self.__cache:
+        if key not in __cache:
 
             handle = urllib.request.urlopen(self._url)
 
@@ -88,9 +89,9 @@ class Mensaparser(object):
                     continue
                 week[day] = self._parse_day(dayhtml[0])
 
-            self.__cache[key] = week
+            __cache[key] = week
 
-        return self.__cache[key]
+        return __cache[key]
 
     def get_today(self):
         week = self.get()
@@ -117,11 +118,16 @@ class EmailNotifiyer(object):
 
         sendmsg = ""
         for key in  sorted(user_msg.keys()):
+            if user_msg[key] == []:
+                continue
             mensaname = get_pretty_name(key)
             sendmsg += mensaname + "\n" + "-" * len(mensaname) + "\n"
             for food in user_msg[key]:
                 sendmsg += "{where}: {what} {price}\n".format(where=food[0], what=food[1], price=food[2])
             sendmsg += "\n"
+
+        if sendmsg == "":
+            return
 
         sendmsg += API
 
@@ -180,6 +186,7 @@ def load_users(userfile):
 def main(args):
     lInfo("start mensabot")
     lInfo("read config")
+    # todo: config file as cli-parameter/default value
     # read config file
     try:
         global config

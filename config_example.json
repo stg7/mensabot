@@ -9,7 +9,8 @@
         "ilmenau_nanoteria": "http://www.stw-thueringen.de/deutsch/mensen/einrichtungen/ilmenau/cafeteria-nanoteria.html",
         "ilmenau_ehrenberg": "http://www.stw-thueringen.de/deutsch/mensen/einrichtungen/ilmenau/mensa-ehrenberg.html"
     },
-    "users_file" : "users.json"
+    "users_file" : "users.json",
+    "webport": 4223
 }
 
 

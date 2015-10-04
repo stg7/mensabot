@@ -10,6 +10,8 @@ import os
 import argparse
 import shelve
 import json
+import urllib.request
+import re
 
 # load libs from lib directory
 import loader
@@ -31,6 +33,20 @@ from bottle import static_file
 config = None
 
 
+def get_external_ip():
+    req = urllib.request.Request("http://whatismyip.org/", headers={'User-Agent': 'Mozilla'})
+    handle = urllib.request.urlopen(req, timeout=120)
+    encoding = handle.headers.get_content_charset() if handle.headers.get_content_charset() != None else "latin1"
+    content = str(handle.read().decode(encoding, errors='ignore'))
+    res = " ".join(content.split())
+
+    return re.findall("[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+", res)[0]
+
+
+def valid_email(email):
+    return "@" in email and "." in email
+
+
 @route('/api/mensa/:mensaname')
 def get_food(mensaname):
     if mensaname not in config["mensas"]:
@@ -44,9 +60,13 @@ def get_food(mensaname):
 @route('/subscribe')
 @route('/subscribe', method="POST")
 def subscribe():
-    if "email" in request.forms and valid_mail(request.forms.get("email")):
-        print(request.forms.get("email"))
-
+    validation = {"email": False, "time": False, "places": False}
+    message = []
+    if "email" in request.forms:
+        if not valid_email(request.forms.get("email")):
+            message.append("Email not valid! {}".format(request.forms.get("email")))
+        else:
+            validation["email"] = True
 
     email = request.forms.get("email", "")
     selection = []
@@ -54,7 +74,7 @@ def subscribe():
 
     return template("templates/subscribe.tpl", title="MensaBot+",
                 mensas={get_pretty_name(x): x for x in config["mensas"]},
-                email=email, selection=selection, time=time, msg="")
+                email=email, selection=selection, time=time, msg="<br>".join(message))
 
 
 @route('/unsubscribe')
@@ -71,20 +91,25 @@ def about():
 def mensa(mensaname):
     if mensaname not in config["mensas"]:
         return index()
-    return template("templates/mensa.tpl", title="MensaBot+ -- " + get_pretty_name(mensaname), mensa=get_pretty_name(mensaname), mensaname=mensaname, food=get_food(mensaname))
+    return template("templates/mensa.tpl", title="MensaBot+ -- " + get_pretty_name(mensaname),
+        mensa=get_pretty_name(mensaname), mensaname=mensaname, food=get_food(mensaname))
 
 
 @route('/')
 def index():
-    return template("templates/index.tpl", title="MensaBot+", mensas={get_pretty_name(x): x for x in config["mensas"]})
+    return template("templates/index.tpl", title="MensaBot+",
+        mensas={get_pretty_name(x): x for x in config["mensas"]})
+
 
 @error(404)
 def error404(error):
     return index()
 
+
 @route("/favicon.ico")
 def favicon():
     return server_static("favicon.ico")
+
 
 @route('/static/<filename>')
 def server_static(filename):
@@ -92,7 +117,7 @@ def server_static(filename):
 
 
 def main(args):
-    lInfo("start web interface for mensabot")
+    lInfo("start web interface for mensabot+")
     lInfo("read config")
     # read config file
     try:
@@ -104,7 +129,7 @@ def main(args):
 
 
     lInfo("server starting.")
-    run(host='0.0.0.0', port=4223, debug=True, reloader=True)
+    run(host='0.0.0.0', port=config["webport"], debug=True, reloader=True)
     lInfo("server stopped.")
 
 

@@ -16,7 +16,7 @@
         <div class="row marketing">
           <div class="col-lg-6">
           <h4>subscribe <small>to MensaBot+</small></h4>
-
+          {{!msg}}
           <form class="form-inline" method="post" action="subscribe" >
             <ul>
               <li><input name="email" type="email" class="form-control" placeholder="email@provider.com"
@@ -27,7 +27,7 @@
               </li>
               <li><div class="input-group">
                     <span class="input-group-addon">
-                      % for m in mensas:
+                      % for m in sorted(mensas.keys()):
                         <input type="checkbox" aria-label="test" value="{{mensas[m]}}"> {{m}}
                       % end
                     </span>
