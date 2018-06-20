@@ -65,7 +65,6 @@ class Mensaparser(object):
             what = re.sub("\s+", " ", re.sub("\nInhalt:.*", "", cols[1].get_text()).strip())
             price = cols[2].get_text().strip()
             dishes +=[(where, what, price)]
-
         return dishes
 
     def get(self):
@@ -77,9 +76,7 @@ class Mensaparser(object):
             handle = urllib.request.urlopen(self._url)
 
             content = handle.read().decode("latin-1", "replace")
-
-            soup = BeautifulSoup(content, "lxml")
-
+            soup = BeautifulSoup(content, "html.parser")
             days = ["day_" + str(i) for i in range(2, 7)]
 
             week = {}
