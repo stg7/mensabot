@@ -11,6 +11,7 @@ import argparse
 import shelve
 import json
 import urllib.request
+import ssl
 import signal
 from time import sleep
 from datetime import *
@@ -22,6 +23,11 @@ from log import *
 from system import *
 
 from bs4 import BeautifulSoup
+
+# ignore ssl errors
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
 DEBUG = True
 
@@ -72,8 +78,10 @@ class Mensaparser(object):
         __cache = shelve.open(self.__cachename)
 
         if key not in __cache:
-
-            handle = urllib.request.urlopen(self._url)
+            try:
+                handle = urllib.request.urlopen(self._url, context=ctx)
+            except Exception as e:
+                print(e)
 
             content = handle.read().decode("latin-1", "replace")
             soup = BeautifulSoup(content, "html.parser")
@@ -138,9 +146,7 @@ class EmailNotifiyer(object):
         msg['To'] = user
         msg['Subject'] = Header('[MensaBot+] ' + get_day_name() + " " + get_date_str(), "utf-8")
 
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.ehlo()
-        server.starttls()
+        server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         server.login(self._from_username, self._from_pw)
         try:
             server.sendmail(self._from_username, user, msg.as_string())
@@ -198,6 +204,7 @@ def main(args):
     mensas = {}
     for mensaname in sorted(config["mensas"].keys()):
         mensas[mensaname] = Mensaparser(config["mensas"][mensaname], mensaname)
+        print(mensas[mensaname].get_today())
 
     userfile_path = os.path.dirname(os.path.realpath(__file__)) + "/" + config["users_file"]
 
