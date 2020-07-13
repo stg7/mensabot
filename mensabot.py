@@ -126,10 +126,10 @@ class EmailNotifiyer(object):
             if user_msg[key] == []:
                 continue
             mensaname = get_pretty_name(key)
-            sendmsg += mensaname + "\n" + "-" * len(mensaname) + "\n"
+            sendmsg += mensaname + "<br>\n" + "-" * len(mensaname) + "<br>\n"
             for food in user_msg[key]:
-                sendmsg += "{where}: {what} {price}\n".format(where=food[0], what=food[1], price=food[2])
-            sendmsg += "\n"
+                sendmsg += "{where}: {what} {price} <br>\n".format(where=food[0], what=food[1], price=food[2])
+            sendmsg += "<br>\n"
 
         if sendmsg == "":
             return
@@ -140,7 +140,7 @@ class EmailNotifiyer(object):
         from email.mime.text import MIMEText
         from email.header import Header
 
-        msg = MIMEText(sendmsg, _charset="UTF-8")
+        msg = MIMEText(sendmsg, 'html', _charset="UTF-8")
 
         msg['From'] = self._from_username
         msg['To'] = user

@@ -1,14 +1,12 @@
-MensaBot+
-=========
-MensaBot+ is the successor of a small prototype. 
-The idea for MensaBot starts in my first working days. I was always annoyed that I don't know which meals the university canteen called 'mensa' was offering.
+# MensaBot+
+MensaBot+ is the successor of a small prototype.
+The idea for MensaBot started during my first working days.
+I was always annoyed that I don't know which meals the university canteen called 'mensa' was offering.
 
-Requirements
-------------
+## Requirements
 Python3 and BeautifulSoup (install via `pip3 install bs4`)
 
-First Start
---------------
+## First Start
 Create `config.json`, use `config_example.json` as template and modify at least email settings.
 You can now start mensabot with
 ```
