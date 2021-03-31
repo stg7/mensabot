@@ -61,47 +61,43 @@ class Mensaparser(object):
         name = "_".join(name.split())
         self.__cachename = os.path.dirname(os.path.realpath(__file__)) + "/_" + name + "_cache"
 
-    def _parse_day(self, node):
-        dishes = []
-        for row in node.find_all("tr"):
-            cols = row.find_all("td")
-            if cols == []:
-                continue
-            where = cols[0].get_text().replace("Mittag", " ").strip()
-            what = re.sub("\s+", " ", re.sub("\nInhalt:.*", "", cols[1].get_text()).strip())
-            price = cols[2].get_text().strip()
-            dishes +=[(where, what, price)]
-        return dishes
+    # def _parse_day(self, node):
+    #     dishes = []
+    #     for row in node.find_all("tr"):
+    #         cols = row.find_all("td")
+    #         if cols == []:
+    #             continue
+    #         where = cols[0].get_text().replace("Mittag", " ").strip()
+    #         what = re.sub("\s+", " ", re.sub("\nInhalt:.*", "", cols[1].get_text()).strip())
+    #         price = cols[2].get_text().strip()
+    #         dishes +=[(where, what, price)]
+    #     return dishes
 
-    def get(self):
+    def get(self, debug=True):
         key = datetime.now().strftime("%x|%H")
         __cache = shelve.open(self.__cachename)
 
-        if key not in __cache:
+        if key not in __cache or debug:
             try:
                 handle = urllib.request.urlopen(self._url, context=ctx)
             except Exception as e:
                 print(e)
+                print(self._url)
 
-            content = handle.read().decode("latin-1", "replace")
+            content = handle.read().decode("utf-8", "replace")
             soup = BeautifulSoup(content, "html.parser")
-            days = ["day_" + str(i) for i in range(2, 7)]
+            dishes = []
+            for meal in soup.find_all(class_="rowMealInner"):
+                what = meal.find_all(class_="mealText")[0].get_text().strip()
+                price = meal.find_all(class_="mealPreise")[0].get_text().strip()
+                dishes.append([what, price])
 
-            week = {}
-            for day in days:
-                dayhtml = soup.find_all("div", id=day)
-                if len(dayhtml) == 0:
-                    continue
-                week[day] = self._parse_day(dayhtml[0])
-
-            __cache[key] = week
+            __cache[key] = [dishes]
 
         return __cache[key]
 
     def get_today(self):
-        week = self.get()
-        currentday = "day_" + str(datetime.today().weekday() + 2)  # mensa day_2=mo .. 6=fr convention
-        return week.get(currentday, [])
+        return self.get()[0]
 
 
 class EmailNotifiyer(object):
@@ -128,7 +124,7 @@ class EmailNotifiyer(object):
             mensaname = get_pretty_name(key)
             sendmsg += mensaname + "<br>\n" + "-" * len(mensaname) + "<br>\n"
             for food in user_msg[key]:
-                sendmsg += "{where}: {what} {price} <br>\n".format(where=food[0], what=food[1], price=food[2])
+                sendmsg += "{what}: {price} <br>\n".format(what=food[0], price=food[1])
             sendmsg += "<br>\n"
 
         if sendmsg == "":
