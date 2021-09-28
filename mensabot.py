@@ -83,6 +83,7 @@ class Mensaparser(object):
             except Exception as e:
                 print(e)
                 print(self._url)
+                return ""
 
             content = handle.read().decode("utf-8", "replace")
             soup = BeautifulSoup(content, "html.parser")
