@@ -109,7 +109,7 @@ class EmailNotifiyer(object):
         self._from_pw = password
         self._from_username = username
 
-    def _send(self, user, user_msg):
+    def _send(self, user, user_msg, debug=False):
         if user == "" or "@" not in user:
             lError("email not valid: {}".format(user))
             return
@@ -118,15 +118,18 @@ class EmailNotifiyer(object):
 
         lInfo("send to {} : ".format(user) + pPrint(list(user_msg.keys()), False))
 
-        sendmsg = ""
-        for key in  sorted(user_msg.keys()):
-            if user_msg[key] == []:
-                continue
-            mensaname = get_pretty_name(key)
-            sendmsg += mensaname + "<br>\n" + "-" * len(mensaname) + "<br>\n"
-            for food in user_msg[key]:
-                sendmsg += "{what}: {price} <br>\n".format(what=food[0], price=food[1])
-            sendmsg += "<br>\n"
+        sendmsg = "test"
+
+        if not debug:
+            sendmsg = ""
+            for key in sorted(user_msg.keys()):
+                if user_msg[key] == []:
+                    continue
+                mensaname = get_pretty_name(key)
+                sendmsg += mensaname + "<br>\n" + "-" * len(mensaname) + "<br>\n"
+                for food in user_msg[key]:
+                    sendmsg += "{what}: {price} <br>\n".format(what=food[0], price=food[1])
+                sendmsg += "<br>\n"
 
         if sendmsg == "":
             return
